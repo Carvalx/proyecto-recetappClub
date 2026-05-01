@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Editar perfil{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-card">
+        <h2>Editar perfil</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="form-error">{{ field.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="form-btn">Guardar cambios</button>
+        </form>
+        <a href="{% url 'perfil' %}" class="form-cancelar">Cancelar</a>
+    </div>
+</div>
+{% endblock %}

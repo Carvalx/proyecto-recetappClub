@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}RecetApp Club - Comparte tu pasion por la cocina{% endblock %}
+
+{% block content %}
+
+<!-- CARRUSEL + HERO -->
+<div class="hero-section">
+
+    <!-- CARRUSEL -->
+    <div class="carrusel" id="carrusel">
+        <div class="carrusel-slides">
+            <div class="slide active">
+                <img src="{% static 'img/imagen_inicio1.webp' %}" alt="Receta 1">
+            </div>
+            <div class="slide">
+                <img src="{% static 'img/imagen_inicio2.webp' %}" alt="Receta 2">
+            </div>
+            <div class="slide">
+                <img src="{% static 'img/imagen_inicio3.jpg' %}" alt="Receta 3">
+            </div>
+            <div class="slide">
+                <img src="{% static 'img/imagen_inicio4.jpg' %}" alt="Receta 4">
+            </div>
+            <div class="slide">
+                <img src="{% static 'img/imagen_inicio5.webp' %}" alt="Receta 5">
+            </div>
+        </div>
+
+        <!-- Flechas -->
+        <button class="carrusel-btn carrusel-prev" onclick="cambiarSlide(-1)">&#8249;</button>
+        <button class="carrusel-btn carrusel-next" onclick="cambiarSlide(1)">&#8250;</button>
+
+        <!-- Puntos -->
+        <div class="carrusel-dots">
+            <span class="dot active" onclick="irASlide(0)"></span>
+            <span class="dot" onclick="irASlide(1)"></span>
+            <span class="dot" onclick="irASlide(2)"></span>
+            <span class="dot" onclick="irASlide(3)"></span>
+            <span class="dot" onclick="irASlide(4)"></span>
+        </div>
+    </div>
+
+    <!-- HERO TEXT -->
+    <div class="hero-content">
+        <h1 class="hero-title">Bienvenido a RecetApp Club</h1>
+        <p class="hero-subtitle">
+            La comunidad donde los amantes de la cocina comparten, descubren y disfrutan recetas de todo el mundo.
+        </p>
+        <div class="hero-buttons">
+            <a href="{% url 'registro' %}" class="btn-hero-primary">Unete gratis</a>
+            <a href="{% url 'login' %}" class="btn-hero-secondary">Iniciar sesion</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- QUE PUEDES HACER -->
+<div class="features-showcase-bg">
+    <section class="features-showcase">
+        <h2 class="features-showcase-title">Todo lo que puedes hacer en RecetApp</h2>
+
+        <div class="showcase-item">
+            <div class="showcase-img-wrap">
+                <img src="{% static 'img/que_hacer1.webp' %}" alt="Publica recetas">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-number">1</span>
+                <h3>Publica tus recetas</h3>
+                <p>Comparte tus creaciones culinarias con miles de personas. Sube fotos, ingredientes e instrucciones paso a paso.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item showcase-item-reverse">
+            <div class="showcase-img-wrap">
+                <img src="{% static 'img/que_hacer2.jpg' %}" alt="Descubre recetas">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-number">2</span>
+                <h3>Descubre nuevas recetas</h3>
+                <p>Explora un universo de recetas filtradas por nombre, categoria e ingredientes. Siempre hay algo nuevo que probar.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item">
+            <div class="showcase-img-wrap">
+                <img src="{% static 'img/que_hacer3.jpg' %}" alt="Guarda favoritas">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-number">3</span>
+                <h3>Guarda tus favoritas</h3>
+                <p>Marca las recetas que mas te gusten y accede a ellas cuando quieras desde tu perfil personal.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item showcase-item-reverse">
+            <div class="showcase-img-wrap">
+                <img src="{% static 'img/que_hacer4.webp' %}" alt="Comenta y valora">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-number">4</span>
+                <h3>Comenta y valora</h3>
+                <p>Interactua con otros cocineros, deja tu opinion y descubre las recetas mejor valoradas por la comunidad.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item">
+            <div class="showcase-img-wrap">
+                <img src="{% static 'img/que_hacer5.webp' %}" alt="App Android">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-number">5</span>
+                <h3>Lleva RecetApp contigo</h3>
+                <p>Disponible en Android. Accede a todas tus recetas favoritas desde cualquier lugar y en cualquier momento.</p>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<!-- CTA FINAL -->
+<div class="cta-section">
+    <div class="cta-stats">
+        <div class="cta-stat">
+            <span class="cta-stat-num" data-objetivo="500" data-prefijo="+">+500</span>
+            <span class="cta-stat-label">Recetas publicadas</span>
+        </div>
+        <div class="cta-stat">
+            <span class="cta-stat-num" data-objetivo="200" data-prefijo="+">+200</span>
+            <span class="cta-stat-label">Cocineros registrados</span>
+        </div>
+        <div class="cta-stat">
+            <span class="cta-stat-num" data-sufijo="%">100%</span>
+            <span class="cta-stat-label">Gratuito</span>
+        </div>
+    </div>
+    <h2>¿Listo para empezar?</h2>
+    <p>Únete a la comunidad y empieza a compartir tus recetas hoy mismo.</p>
+    <a href="{% url 'registro' %}" class="btn-cta">Crear cuenta gratis</a>
+</div>
+
+<script src="{% static 'js/cta_contador.js' %}"></script>
+<script src="{% static 'js/carrusel.js' %}"></script>
+
+{% endblock %}

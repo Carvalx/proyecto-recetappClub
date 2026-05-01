@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Novedades - RecetApp{% endblock %}
+
+{% block content %}
+<div class="novedades-wrapper">
+
+    <h2>Novedades</h2>
+    <p class="novedades-subtitulo">Las ultimas recetas publicadas por la comunidad</p>
+
+    <div class="novedades-lista">
+        {% for receta in recetas %}
+        <a href="{% url 'detalle_receta' receta.pk %}" class="novedad-card">
+
+            {% if receta.imagen %}
+            <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}" class="novedad-img">
+            {% else %}
+            <div class="novedad-placeholder">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+            </div>
+            {% endif %}
+
+            <div class="novedad-body">
+                <div class="novedad-header">
+                    <h3 class="novedad-titulo">{{ receta.titulo }}</h3>
+                    <span class="novedad-tiempo">{{ receta.fecha_creacion|timesince }} ago</span>
+                </div>
+                <p class="novedad-desc">{{ receta.descripcion|truncatewords:20 }}</p>
+                <div class="novedad-meta">
+                    <span class="novedad-autor">{{ receta.autor.username }}</span>
+                    {% if receta.categoria %}
+                    <span class="novedad-categoria">{{ receta.categoria }}</span>
+                    {% endif %}
+                    <span class="novedad-likes">{{ receta.likes.count }} likes</span>
+                </div>
+            </div>
+
+        </a>
+        {% empty %}
+        <p class="sin-resultados">No hay novedades todavia.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

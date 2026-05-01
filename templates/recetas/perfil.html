@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Mi perfil{% endblock %}
+
+{% block content %}
+<div class="perfil-wrapper">
+
+    <div class="perfil-card">
+        {% if user.foto_perfil %}
+        <img src="{{ user.foto_perfil.url }}" class="perfil-avatar" alt="Foto de perfil">
+        {% else %}
+        <div class="perfil-avatar-placeholder">{{ user.username|first|upper }}</div>
+        {% endif %}
+
+        <div class="perfil-info">
+            <h2>{{ user.username }}</h2>
+            <p>{{ user.email }}</p>
+            {% if user.pais %}<p>{{ user.get_pais_display }}</p>{% endif %}
+            {% if user.bio %}<p>{{ user.bio }}</p>{% endif %}
+        </div>
+
+        <div class="perfil-acciones">
+            <a href="{% url 'editar_perfil' %}" class="btn-perfil-editar">Editar perfil</a>
+            <a href="{% url 'cambiar_password' %}" class="btn-perfil-pass">Cambiar contrase&ntilde;a</a>
+        </div>
+    </div>
+
+    <h3 class="perfil-recetas-titulo">Mis recetas ({{ recetas.count }})</h3>
+    <div class="recetas-grid-4">
+        {% for receta in recetas %}
+        <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+            {% if receta.imagen %}
+            <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+            {% else %}
+            <div class="receta-card-placeholder"></div>
+            {% endif %}
+            <div class="receta-card-body">
+                <h3>{{ receta.titulo }}</h3>
+                <small>{{ receta.fecha_creacion|date:"d/m/Y" }}</small>
+            </div>
+        </a>
+        {% empty %}
+        <p class="mis-recetas-vacio">Todavia no has publicado ninguna receta.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}  

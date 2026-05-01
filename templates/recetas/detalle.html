@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ receta.titulo }}{% endblock %}
+
+{% block content %}
+<div class="detalle-wrapper">
+
+    {% if receta.imagen %}
+    <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}" class="detalle-imagen">
+    {% endif %}
+
+    <div class="detalle-header">
+        <div>
+            <h1 class="detalle-titulo">{{ receta.titulo }}</h1>
+            <div class="detalle-meta">
+                <span>por <strong>{{ receta.autor.username }}</strong></span>
+                <span>{{ receta.fecha_creacion|date:"d/m/Y" }}</span>
+                {% if receta.categoria %}
+                <span class="detalle-categoria">{{ receta.categoria }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if user == receta.autor %}
+        <div class="detalle-acciones-autor">
+            <a href="{% url 'editar_receta' receta.pk %}" class="btn-editar-receta">Editar</a>
+            <form method="post" action="{% url 'eliminar_receta' receta.pk %}">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Eliminar esta receta?')" class="btn-eliminar-receta">Eliminar</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <p class="detalle-descripcion">{{ receta.descripcion }}</p>
+
+    <h3 class="detalle-seccion-titulo">Ingredientes</h3>
+    <ul class="detalle-ingredientes">
+        {% for ing in receta.ingredientes.all %}
+        <li>{{ ing.cantidad }} de {{ ing.nombre }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3 class="detalle-seccion-titulo">Instrucciones</h3>
+    <p class="detalle-instrucciones">{{ receta.instrucciones }}</p>
+
+    {% if user.is_authenticated %}
+    <div class="detalle-interacciones">
+        <form method="post">
+            {% csrf_token %}
+            <button name="like" value="1" class="btn-like {% if user in receta.likes.all %}btn-like-activo{% else %}btn-like-inactivo{% endif %}">
+                {{ receta.likes.count }} Me gusta
+            </button>
+        </form>
+        <form method="post">
+            {% csrf_token %}
+            <button name="guardar" value="1" class="btn-guardar {% if ya_guardada %}btn-guardar-activo{% else %}btn-guardar-inactivo{% endif %}">
+                {% if ya_guardada %}Guardada{% else %}Guardar{% endif %}
+            </button>
+        </form>
+        <form method="post" class="valorar-form">
+            {% csrf_token %}
+            <label>Valorar:</label>
+            <select name="puntuacion">
+                {% for i in "12345" %}
+                <option value="{{ i }}" {% if mi_valoracion == i|add:"0" %}selected{% endif %}>{{ i }} estrellas</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-valorar">Valorar</button>
+        </form>
+    </div>
+
+    {% if valoracion_media %}
+    <p class="detalle-valoracion-media">Valoracion media: <strong>{{ valoracion_media|floatformat:1 }} / 5</strong></p>
+    {% endif %}
+    {% endif %}
+
+    <div class="comentarios-seccion">
+        <h3 class="detalle-seccion-titulo">Comentarios ({{ comentarios.count }})</h3>
+        {% if user.is_authenticated %}
+        <form method="post" class="comentario-form">
+            {% csrf_token %}
+            {{ comentario_form.texto }}
+            <button name="comentario" value="1" type="submit" class="btn-comentar">Comentar</button>
+        </form>
+        {% endif %}
+        {% for c in comentarios %}
+        <div class="comentario-card">
+            <span class="comentario-autor">{{ c.autor.username }}</span>
+            <span class="comentario-fecha">{{ c.fecha|date:"d/m/Y H:i" }}</span>
+            <p class="comentario-texto">{{ c.texto }}</p>
+        </div>
+        {% empty %}
+        <p class="sin-comentarios">Sin comentarios todavia.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

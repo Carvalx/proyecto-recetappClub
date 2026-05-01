@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% if editando %}Editar{% else %}Nueva{% endif %} receta{% endblock %}
+
+{% block content %}
+<div class="crear-wrapper">
+    <h2>{% if editando %}Editar receta{% else %}Nueva receta{% endif %}</h2>
+
+    {% if formset.non_form_errors %}
+    <div class="form-error-global">
+        {% for error in formset.non_form_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="form-receta">
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% if field.html_name == 'imagen' %}
+            <div class="form-field">
+                <label>Imagen de la receta</label>
+
+                <div class="imagen-upload-area" id="imagen-upload-area">
+                    {% if editando and form.instance.imagen %}
+                    <div class="imagen-preview-wrap" id="imagen-preview-wrap">
+                        <img src="{{ form.instance.imagen.url }}" class="imagen-preview" id="imagen-preview">
+                        <button type="button" class="imagen-clear-x" id="imagen-clear-btn" title="Eliminar imagen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="imagen-upload-hint" id="imagen-hint" style="display:none;">Haz clic o arrastra una imagen</p>
+                    {% else %}
+                    <div class="imagen-preview-wrap" id="imagen-preview-wrap" style="display:none;">
+                        <img src="" class="imagen-preview" id="imagen-preview">
+                        <button type="button" class="imagen-clear-x" id="imagen-clear-btn" title="Eliminar imagen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="imagen-upload-hint" id="imagen-hint">Haz clic o arrastra una imagen</p>
+                    {% endif %}
+                    <p class="imagen-upload-sub" id="imagen-sub">JPG, PNG o WebP · Se recortará a 800×600</p>
+                </div>
+
+                <input type="file" name="imagen" id="id_imagen" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+                <input type="hidden" name="imagen_recortada" id="imagen_recortada">
+                {% if editando %}<input type="checkbox" name="imagen-clear" id="imagen-clear" style="display:none;">{% endif %}
+
+                {% if form.imagen.errors %}
+                <p class="form-error">{{ form.imagen.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- MODAL RECORTE -->
+            <div class="cropper-modal" id="cropper-modal">
+                <div class="cropper-modal-box">
+                    <div class="cropper-modal-header">
+                        <span>Recortar imagen</span>
+                        <button type="button" class="cropper-cancelar" id="cropper-cancelar">Cancelar</button>
+                    </div>
+                    <div class="cropper-contenedor">
+                        <img id="cropper-img" src="">
+                    </div>
+                    <div class="cropper-modal-footer">
+                        <button type="button" class="cropper-confirmar" id="cropper-confirmar">Confirmar recorte</button>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="form-error">{{ field.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <h3 class="ingredientes-titulo">Ingredientes</h3>
+
+        {{ formset.management_form }}
+        <div id="ingredientes-lista">
+            {% for f in formset %}
+            <div class="ingrediente-fila" id="fila-{{ forloop.counter0 }}">
+                <div class="ingrediente-nombre-wrap">
+                    {{ f.nombre }}
+                    <div class="ingrediente-sugerencias" id="sugerencias-{{ forloop.counter0 }}"></div>
+                </div>
+                <div class="ingrediente-cantidad-wrap">
+                    {{ f.cantidad }}
+                </div>
+                <button type="button" class="btn-eliminar-fila" onclick="eliminarFila(this)" title="Eliminar ingrediente">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+                <div style="display:none;">{% if formset.can_delete %}{{ f.DELETE }}{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn-añadir-ingrediente" onclick="añadirFila()">
+            + Añadir ingrediente
+        </button>
+
+        <button type="submit" class="form-btn" style="margin-top: 28px;">
+            {% if editando %}Guardar cambios{% else %}Publicar receta{% endif %}
+        </button>
+    </form>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script src="{% static 'js/crear_receta.js' %}"></script>
+{% endblock %}

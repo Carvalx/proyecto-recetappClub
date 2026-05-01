@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Iniciar sesión · RecetApp Club{% endblock %}
+{% block body_class %}bg-patron{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-container">
+
+        <div class="auth-logo">
+            <img src="{% static 'img/logo_color.png' %}" alt="RecetApp Club">
+        </div>
+
+        <h2 class="auth-title">Bienvenido de nuevo</h2>
+        <p class="auth-subtitle">Inicia sesión para acceder a tus recetas</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="auth-field">
+                <label for="id_username">Usuario</label>
+                <input type="text" name="username" id="id_username" placeholder="" autocomplete="username">
+            </div>
+            <div class="auth-field">
+                <label for="id_password">Contrase&ntilde;a</label>
+                <input type="password" name="password" id="id_password" placeholder="" autocomplete="current-password">
+            </div>
+            {% if form.errors %}
+            <p style="color:#e53935; font-size:0.875rem; margin-bottom:12px;">
+                Usuario o contrase&ntilde;a incorrectos.
+            </p>
+            {% endif %}
+            <button type="submit" class="auth-btn">Iniciar sesión</button>
+        </form>
+
+        <p class="auth-footer-link">
+            ¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate gratis</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}

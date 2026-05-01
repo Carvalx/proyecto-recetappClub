@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Crear cuenta · RecetApp Club{% endblock %}
+{% block body_class %}bg-patron{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-container">
+
+        <div class="auth-logo">
+            <img src="{% static 'img/logo_color.png' %}" alt="RecetApp Club">
+        </div>
+
+        <h2 class="auth-title">Crea tu cuenta</h2>
+        <p class="auth-subtitle">Únete a la comunidad y empieza a compartir recetas</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="auth-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p style="color:#e53935; font-size:0.8rem; margin-top:4px;">{{ field.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="auth-btn">Crear cuenta gratis</button>
+        </form>
+
+        <p class="auth-footer-link">
+            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}

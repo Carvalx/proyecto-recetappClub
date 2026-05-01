@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Recetas - RecetApp{% endblock %}
+
+{% block content %}
+<h2 style="margin-bottom:20px;">Todas las recetas</h2>
+
+<form method="get" style="display:flex;gap:12px;margin-bottom:24px;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Buscar recetas..."
+        style="padding:8px 12px;border-radius:6px;border:1px solid #ddd;flex:1;">
+    <select name="categoria" style="padding:8px 12px;border-radius:6px;border:1px solid #ddd;">
+        <option value="">Todas las categorías</option>
+        {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if categoria_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}        </option>
+        {% endfor %}
+    </select>
+    <button type="submit"
+        style="background:#ff6b35;color:white;padding:8px 20px;border:none;border-radius:6px;cursor:pointer;">Buscar</button>
+</form>
+
+<div class="recetas-grid">
+    {% for receta in recetas %}
+    <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+        {% if receta.imagen %}
+        <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+        {% else %}
+        <div class="receta-card-placeholder">🍽️</div>
+        {% endif %}
+        <div class="receta-card-body">
+            <h3>{{ receta.titulo }}</h3>
+            <p>{{ receta.descripcion|truncatewords:15 }}</p>
+            <small>por {{ receta.autor.username }} · {{ receta.fecha_creacion|date:"d/m/Y" }}</small>
+        </div>
+    </a>
+    {% empty %}
+    <p>No se encontraron recetas.</p>
+    {% endfor %}
+</div>
+{% endblock %}

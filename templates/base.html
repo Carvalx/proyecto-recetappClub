@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RecetApp Club{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="{% url 'inicio' %}">
+                <img src="{% static 'img/logo_blanco.png' %}" alt="RecetApp Club" class="nav-logo-img">
+            </a>
+        </div>
+
+        <!-- HAMBURGER BUTTON (solo móvil) -->
+        <button class="hamburger" id="hamburger" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- LINKS -->
+        <div class="navbar-menu" id="navbarMenu">
+            <div class="navbar-links">
+                <a href="{% url 'explorar' %}" class="nav-link">Explorar</a>
+                <a href="{% url 'novedades' %}" class="nav-link">Novedades</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'mis_recetas' %}" class="nav-link">Mis Recetas</a>
+                <a href="{% url 'crear_receta' %}" class="nav-link nav-btn-crear">+ Nueva receta</a>
+                {% endif %}
+            </div>
+
+            <div class="navbar-right">
+                {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <div class="user-info" onclick="toggleDropdown()">
+                        {% if user.foto_perfil %}
+                        <img src="{{ user.foto_perfil.url }}" alt="foto" class="avatar">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ user.username|first|upper }}</div>
+                        {% endif %}
+                        <span class="username">{{ user.username }}</span>
+                        <span class="dropdown-arrow">▾</span>
+                    </div>
+                    <div class="dropdown" id="userDropdown">
+                        <a href="{% url 'perfil' %}" class="dropdown-item">Mi perfil</a>
+                        <a href="{% url 'mis_recetas' %}" class="dropdown-item">Mis Recetas</a>
+                        <a href="{% url 'crear_receta' %}" class="dropdown-item">Nueva receta</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'editar_perfil' %}" class="dropdown-item">Editar perfil</a>
+                        <a href="{% url 'cambiar_password' %}" class="dropdown-item">Cambiar contraseña</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item dropdown-logout">Cerrar sesión</a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Iniciar sesión</a>
+                <a href="{% url 'registro' %}" class="nav-link nav-btn-registro">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <h3 class="footer-brand">RecetApp Club</h3>
+                <p>Plataforma de recetas multiplataforma. Comparte, descubre y cocina.</p>
+                <p style="margin-top:8px;">Disponible en Android</p>
+            </div>
+            <div>
+                <h4 class="footer-title">Navegación</h4>
+                <ul class="footer-list">
+                    <li><a href="{% url 'explorar' %}">Explorar</a></li>
+                    <li><a href="{% url 'novedades' %}">Novedades</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'mis_recetas' %}">Mis Recetas</a></li>
+                    <li><a href="{% url 'crear_receta' %}">Nueva receta</a></li>
+                    {% else %}
+                    <li><a href="{% url 'registro' %}">Registrarse</a></li>
+                    <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-title">Legal</h4>
+                <ul class="footer-list">
+                    <li><a href="{% url 'politica_privacidad' %}">Política de privacidad</a></li>
+                    <li><a href="{% url 'politica_cookies' %}">Política de cookies</a></li>
+                    <li><a href="{% url 'terminos_uso' %}">Términos de uso</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-title">Contacto</h4>
+                <p class="footer-contact">
+                    <a href="mailto:recetappclub@gmail.com" class="footer-mail">recetappclub@gmail.com</a><br>
+                    Valencia, España<br>
+                    App disponible en Android
+                </p>
+                <p class="footer-title" style="margin-top: 16px;">Síguenos</p>
+                <div class="footer-social">
+                    <a href="https://www.youtube.com/@recetappclub" target="_blank" rel="noopener" class="footer-social-link" aria-label="YouTube">
+                        <img src="https://cdn.simpleicons.org/youtube/aaaaaa" alt="YouTube" width="24" height="24">
+                    </a>
+                    <a href="https://www.facebook.com/recetappclub" target="_blank" rel="noopener" class="footer-social-link" aria-label="Facebook">
+                        <img src="https://cdn.simpleicons.org/facebook/aaaaaa" alt="Facebook" width="24" height="24">
+                    </a>
+                    <a href="https://www.instagram.com/recetappclub" target="_blank" rel="noopener" class="footer-social-link" aria-label="Instagram">
+                        <img src="https://cdn.simpleicons.org/instagram/aaaaaa" alt="Instagram" width="24" height="24">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 RecetApp Club · Desarrollado por Carlos Macero
+        </div>
+    </footer>
+    {% endblock %}
+
+    <script>
+        function toggleNav() {
+            const menu = document.getElementById('navbarMenu');
+            const hamburger = document.getElementById('hamburger');
+            menu.classList.toggle('open');
+            hamburger.classList.toggle('active');
+        }
+
+        function toggleDropdown() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        window.onclick = function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown')?.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

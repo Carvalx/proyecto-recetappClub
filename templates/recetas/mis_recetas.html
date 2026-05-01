@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Mis Recetas{% endblock %}
+
+{% block content %}
+<div class="mis-recetas-wrapper">
+
+    <div class="seccion-header">
+        <h2>Mis Recetas</h2>
+    </div>
+
+    <div class="mis-recetas-bloque">
+        <h3 class="mis-recetas-subtitulo">Mis creaciones ({{ creaciones.count }})</h3>
+        <div class="recetas-grid-4">
+            {% for receta in creaciones %}
+            <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+                {% if receta.imagen %}
+                <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                {% else %}
+                <div class="receta-card-placeholder"></div>
+                {% endif %}
+                <div class="receta-card-body">
+                    <h3>{{ receta.titulo }}</h3>
+                    <small>{{ receta.fecha_creacion|date:"d/m/Y" }}</small>
+                </div>
+            </a>
+            {% empty %}
+            <p class="mis-recetas-vacio">Todavia no has creado ninguna receta. <a href="{% url 'crear_receta' %}">Crea la primera</a></p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mis-recetas-bloque">
+        <h3 class="mis-recetas-subtitulo">Guardadas ({{ favoritas.count }})</h3>
+        <div class="recetas-grid-4">
+            {% for receta in favoritas %}
+            <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+                {% if receta.imagen %}
+                <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                {% else %}
+                <div class="receta-card-placeholder"></div>
+                {% endif %}
+                <div class="receta-card-body">
+                    <h3>{{ receta.titulo }}</h3>
+                    <p>por {{ receta.autor.username }}</p>
+                    <small>{{ receta.fecha_creacion|date:"d/m/Y" }}</small>
+                </div>
+            </a>
+            {% empty %}
+            <p class="mis-recetas-vacio">No has guardado ninguna receta todavia.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

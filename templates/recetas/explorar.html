@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Explorar - RecetApp{% endblock %}
+
+{% block content %}
+<div class="explorar-wrapper">
+
+    <h2>Explorar recetas</h2>
+
+    <!-- BUSCADOR -->
+    <form method="get" class="buscador-card">
+        <div class="buscador-grid">
+            <div class="buscador-field">
+                <label for="q">Nombre de la receta</label>
+                <input type="text" name="q" id="q" value="{{ query }}" placeholder="Ej: Paella, Pizza...">
+            </div>
+            <div class="buscador-field">
+                <label for="ingrediente">Ingrediente</label>
+                <input type="text" name="ingrediente" id="ingrediente" value="{{ ingrediente }}" placeholder="Ej: Tomate, Pollo...">
+            </div>
+        </div>
+
+        <div class="buscador-categorias">
+            <label>Categoria</label>
+            <div class="categorias-pills">
+                <label class="pill">
+                    <input type="radio" name="categoria" value="" {% if not categoria_id %}checked{% endif %}> Todas
+                </label>
+                {% for cat in categorias %}
+                <label class="pill">
+                    <input type="radio" name="categoria" value="{{ cat.id }}" {% if categoria_id == cat.id|stringformat:"s" %}checked{% endif %}> {{ cat.nombre }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="buscador-actions">
+            <button type="submit" class="btn-buscar">Buscar</button>
+            {% if query or categoria_id or ingrediente %}
+            <a href="{% url 'explorar' %}" class="btn-limpiar">Limpiar filtros</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- RESULTADOS -->
+    {% if query or categoria_id or ingrediente %}
+    <div class="seccion-bloque">
+        <h3 class="seccion-titulo-dark">Resultados</h3>
+        <div class="recetas-grid-4">
+            {% for receta in recetas %}
+            <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+                {% if receta.imagen %}
+                <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                {% else %}
+                <div class="receta-card-placeholder"></div>
+                {% endif %}
+                <div class="receta-card-body">
+                    <h3>{{ receta.titulo }}</h3>
+                    <p>{{ receta.descripcion|truncatewords:12 }}</p>
+                    <small>por {{ receta.autor.username }}</small>
+                </div>
+            </a>
+            {% empty %}
+            <p class="sin-resultados">No se encontraron recetas con esos filtros.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- MEJOR VALORADAS -->
+    <div class="seccion-bloque">
+        <h3 class="seccion-titulo">Mejor valoradas</h3>
+        <div class="recetas-grid-4">
+            {% for receta in mas_valoradas %}
+            <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+                {% if receta.imagen %}
+                <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                {% else %}
+                <div class="receta-card-placeholder"></div>
+                {% endif %}
+                <div class="receta-card-body">
+                    <h3>{{ receta.titulo }}</h3>
+                    <p class="receta-valoracion">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        {{ receta.media|floatformat:1 }}
+                    </p>
+                    <small>por {{ receta.autor.username }}</small>
+                </div>
+            </a>
+            {% empty %}
+            <p class="sin-resultados">No hay recetas valoradas todavia.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- MAS POPULARES -->
+    <div class="seccion-bloque">
+        <h3 class="seccion-titulo">Mas populares</h3>
+        <div class="recetas-grid-4">
+            {% for receta in mas_populares %}
+            <a href="{% url 'detalle_receta' receta.pk %}" class="receta-card">
+                {% if receta.imagen %}
+                <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                {% else %}
+                <div class="receta-card-placeholder"></div>
+                {% endif %}
+                <div class="receta-card-body">
+                    <h3>{{ receta.titulo }}</h3>
+                    <p>{{ receta.total_likes }} likes</p>
+                    <small>por {{ receta.autor.username }}</small>
+                </div>
+            </a>
+            {% empty %}
+            <p class="sin-resultados">No hay recetas populares todavia.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
