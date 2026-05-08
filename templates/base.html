@@ -57,7 +57,7 @@
                         <a href="{% url 'editar_perfil' %}" class="dropdown-item">Editar perfil</a>
                         <a href="{% url 'cambiar_password' %}" class="dropdown-item">Cambiar contraseña</a>
                         <div class="dropdown-divider"></div>
-                        <a href="{% url 'logout' %}" class="dropdown-item dropdown-logout">Cerrar sesión</a>
+                        <a href="#" class="dropdown-item dropdown-logout" onclick="logoutPost(event)">Cerrar sesión</a>
                     </div>
                 </div>
                 {% else %}
@@ -145,6 +145,21 @@
             if (!e.target.closest('.user-menu')) {
                 document.getElementById('userDropdown')?.classList.remove('show');
             }
+        }
+
+        //Cierre de sesión seguro para el usuario:
+        function logoutPost(e) {
+            e.preventDefault();
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'logout' %}";
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = 'csrfmiddlewaretoken';
+            csrf.value = '{{ csrf_token }}';
+            form.appendChild(csrf);
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 </body>

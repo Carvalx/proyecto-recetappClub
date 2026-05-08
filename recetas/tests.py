@@ -416,3 +416,69 @@ class APIRecetasTests(TestCase):
         """Las categorías son accesibles sin autenticación"""
         response = self.client.get("/api/categorias/")
         self.assertEqual(response.status_code, 200)
+
+
+from django.core import mail
+
+# ─────────────────────────────────────────
+# TESTS DE RECUPERACIÓN DE CONTRASEÑA Y LOGOUT
+# ─────────────────────────────────────────
+
+
+class PasswordResetTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.usuario = crear_usuario(username="resetuser", password="pass1234")
+        self.usuario.email = "resetuser@test.com"
+        self.usuario.save()
+
+    def test_pagina_reset_carga_correctamente(self):
+        """La página de recuperación de contraseña carga con status 200"""
+        response = self.client.get("/accounts/password_reset/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_email_enviado_con_email_existente(self):
+        """Se envía un email cuando el email existe en la BD"""
+        response = self.client.post(
+            "/accounts/password_reset/", {"email": "resetuser@test.com"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("resetuser@test.com", mail.outbox[0].to)
+
+    def test_no_revela_si_email_no_existe(self):
+        """No revela si el email existe o no — redirige igual por seguridad"""
+        response = self.client.post(
+            "/accounts/password_reset/", {"email": "noexiste@test.com"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_pagina_done_carga_correctamente(self):
+        """La página de confirmación de email enviado carga con status 200"""
+        response = self.client.get("/accounts/password_reset/done/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_pagina_reset_complete_carga_correctamente(self):
+        """La página de contraseña restablecida carga con status 200"""
+        response = self.client.get("/accounts/reset/done/")
+        self.assertEqual(response.status_code, 200)
+
+
+class LogoutTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.usuario = crear_usuario()
+        self.client.force_login(self.usuario)
+
+    def test_logout_post_cierra_sesion(self):
+        """El logout por POST cierra la sesión correctamente"""
+        response = self.client.post("/logout/")
+        self.assertEqual(response.status_code, 302)
+
+    def test_logout_get_no_permitido(self):
+        """El logout por GET no está permitido en Django 5.2"""
+        response = self.client.get("/logout/")
+        self.assertNotEqual(response.status_code, 200)
