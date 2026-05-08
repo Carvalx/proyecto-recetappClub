@@ -35,6 +35,12 @@ jobs:
       DB_PASSWORD: postgres
       DB_HOST: localhost
       DB_PORT: 5432
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USE_TLS: "True"
+      EMAIL_HOST_USER: test@test.com
+      EMAIL_HOST_PASSWORD: testpassword
+      DEFAULT_FROM_EMAIL: RecetApp Club <test@test.com>
 
     steps:
       - name: Checkout código
