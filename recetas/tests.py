@@ -223,3 +223,196 @@ class ValoracionTests(TestCase):
             Valoracion.objects.create(
                 receta=self.receta, usuario=self.usuario, puntuacion=3.0
             )
+
+
+from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
+
+# ─────────────────────────────────────────
+# TESTS DE API
+# ─────────────────────────────────────────
+
+
+class APIAutenticacionTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_registro_correcto(self):
+        """Un usuario nuevo puede registrarse y recibe un token"""
+        response = self.client.post(
+            "/api/registro/",
+            {
+                "username": "nuevo",
+                "password": "pass1234",
+                "password2": "pass1234",
+                "email": "nuevo@test.com",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.data)
+
+    def test_registro_passwords_no_coinciden(self):
+        """El registro falla si las contraseñas no coinciden"""
+        response = self.client.post(
+            "/api/registro/",
+            {
+                "username": "nuevo",
+                "password": "pass1234",
+                "password2": "otrapass",
+                "email": "nuevo@test.com",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_login_correcto(self):
+        """Un usuario existente puede hacer login y recibe un token"""
+        crear_usuario(username="login_user", password="pass1234")
+        response = self.client.post(
+            "/api/login/", {"username": "login_user", "password": "pass1234"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.data)
+
+    def test_login_credenciales_incorrectas(self):
+        """El login falla con credenciales incorrectas"""
+        response = self.client.post(
+            "/api/login/", {"username": "noexiste", "password": "wrongpass"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_perfil_requiere_autenticacion(self):
+        """El endpoint de perfil devuelve 401 sin token"""
+        response = self.client.get("/api/perfil/")
+        self.assertEqual(response.status_code, 401)
+
+    def test_perfil_autenticado(self):
+        """Un usuario autenticado puede ver su perfil"""
+        usuario = crear_usuario()
+        token, _ = Token.objects.get_or_create(user=usuario)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        response = self.client.get("/api/perfil/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["username"], "testuser")
+
+
+class APIRecetasTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.usuario = crear_usuario()
+        self.categoria = crear_categoria()
+        self.receta = crear_receta(self.usuario, self.categoria)
+        token, _ = Token.objects.get_or_create(user=self.usuario)
+        self.token = token.key
+
+    def autenticar(self):
+        """Helper para autenticar el cliente"""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
+
+    def test_listar_recetas_sin_autenticacion(self):
+        """Cualquiera puede listar recetas sin token"""
+        response = self.client.get("/api/recetas/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_listar_recetas_devuelve_resultados(self):
+        """La lista de recetas devuelve al menos la receta creada"""
+        response = self.client.get("/api/recetas/")
+        self.assertGreaterEqual(len(response.data), 1)
+
+    def test_crear_receta_autenticado(self):
+        """Un usuario autenticado puede crear una receta"""
+        self.autenticar()
+        response = self.client.post(
+            "/api/recetas/",
+            {
+                "titulo": "Nueva receta",
+                "descripcion": "Desc",
+                "instrucciones": "Instrucciones",
+                "categoria": self.categoria.id,
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_crear_receta_sin_autenticacion(self):
+        """Un usuario sin token no puede crear recetas"""
+        response = self.client.post(
+            "/api/recetas/",
+            {
+                "titulo": "Intento sin token",
+                "descripcion": "Desc",
+                "instrucciones": "Instrucciones",
+            },
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_detalle_receta(self):
+        """Se puede ver el detalle de una receta por su id"""
+        response = self.client.get(f"/api/recetas/{self.receta.id}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["titulo"], "Tarta de queso")
+
+    def test_eliminar_receta_propia(self):
+        """Un usuario puede eliminar su propia receta"""
+        self.autenticar()
+        response = self.client.delete(f"/api/recetas/{self.receta.id}/")
+        self.assertEqual(response.status_code, 204)
+
+    def test_eliminar_receta_ajena_falla(self):
+        """Un usuario no puede eliminar la receta de otro"""
+        otro_usuario = crear_usuario(username="otro")
+        token_otro, _ = Token.objects.get_or_create(user=otro_usuario)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token_otro.key}")
+        response = self.client.delete(f"/api/recetas/{self.receta.id}/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_like_receta(self):
+        """Un usuario autenticado puede dar like a una receta"""
+        self.autenticar()
+        response = self.client.post(f"/api/recetas/{self.receta.id}/like/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["liked"])
+
+    def test_like_doble_quita_like(self):
+        """Dar like dos veces quita el like"""
+        self.autenticar()
+        self.client.post(f"/api/recetas/{self.receta.id}/like/")
+        response = self.client.post(f"/api/recetas/{self.receta.id}/like/")
+        self.assertFalse(response.data["liked"])
+
+    def test_valorar_receta(self):
+        """Un usuario autenticado puede valorar una receta"""
+        self.autenticar()
+        response = self.client.post(
+            f"/api/recetas/{self.receta.id}/valorar/", {"puntuacion": "4.5"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["ok"])
+
+    def test_guardar_receta(self):
+        """Un usuario autenticado puede guardar una receta"""
+        self.autenticar()
+        response = self.client.post(f"/api/recetas/{self.receta.id}/guardar/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["guardada"])
+
+    def test_comentar_receta(self):
+        """Un usuario autenticado puede comentar una receta"""
+        self.autenticar()
+        response = self.client.post(
+            f"/api/recetas/{self.receta.id}/comentar/", {"texto": "Qué buena receta"}
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_mis_recetas_autenticado(self):
+        """Un usuario autenticado puede ver sus recetas"""
+        self.autenticar()
+        response = self.client.get("/api/mis-recetas/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("creaciones", response.data)
+        self.assertIn("favoritas", response.data)
+
+    def test_categorias_publicas(self):
+        """Las categorías son accesibles sin autenticación"""
+        response = self.client.get("/api/categorias/")
+        self.assertEqual(response.status_code, 200)

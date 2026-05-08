@@ -46,6 +46,7 @@ def api_login(request):
 
 
 @api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
 def api_perfil(request):
     serializer = UsuarioSerializer(request.user)
     return Response(serializer.data)
@@ -74,6 +75,9 @@ class RecetaListCreate(generics.ListCreateAPIView):
         serializer.save(autor=self.request.user)
 
 
+from rest_framework.exceptions import PermissionDenied
+
+
 class RecetaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Receta.objects.all()
     serializer_class = RecetaSerializer
@@ -82,6 +86,16 @@ class RecetaDetail(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method in ["PUT", "PATCH", "DELETE"]:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticatedOrReadOnly()]
+
+    def perform_destroy(self, instance):
+        if instance.autor != self.request.user:
+            raise PermissionDenied("No puedes eliminar una receta que no es tuya")
+        instance.delete()
+
+    def perform_update(self, serializer):
+        if serializer.instance.autor != self.request.user:
+            raise PermissionDenied("No puedes editar una receta que no es tuya")
+        serializer.save()
 
 
 # INGREDIENTES

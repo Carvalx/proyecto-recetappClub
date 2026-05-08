@@ -12,12 +12,21 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class RegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
 
     class Meta:
         model = Usuario
-        fields = ["username", "email", "password"]
+        fields = ["username", "email", "password", "password2"]
+
+    def validate(self, data):
+        if data["password"] != data["password2"]:
+            raise serializers.ValidationError(
+                {"password": "Las contraseñas no coinciden"}
+            )
+        return data
 
     def create(self, validated_data):
+        validated_data.pop("password2")
         user = Usuario.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
